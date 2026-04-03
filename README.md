@@ -5,13 +5,13 @@ Monorepo for an investor relations monitoring MVP focused on authentication, RBA
 ## Tech stack
 
 - `backend/` Java 21, Spring Boot 3, Spring Security, JPA, Flyway, PostgreSQL, JWT, WebSocket support
-- `frontend/` Angular 17+ placeholder for the upcoming SPA
+- `frontend/` Angular 18.2.x application
 - `docker-compose.yml` local PostgreSQL and Redis services
 
 ## Repository structure
 
 - `backend/` Spring Boot API
-- `frontend/` Angular application placeholder
+- `frontend/` Angular 18.2.x application
 - `docker-compose.yml` local infrastructure for development
 
 ## Backend status
@@ -41,7 +41,7 @@ The frontend has not been generated yet.
 
 ### Infrastructure
 
-Start PostgreSQL and Redis:
+Start PostgreSQL 16 and Redis:
 
 ```bash
 docker compose up -d
@@ -73,7 +73,6 @@ Optional environment variables:
 ## Current blockers
 
 - Maven still needs to be installed and available on `PATH` locally
-- Frontend scaffold still needs to be created
 - Backend compile/run verification still needs to be completed after Maven is available
 
 ## Next planned steps
