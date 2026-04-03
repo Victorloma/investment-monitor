@@ -1,13 +1,14 @@
 {
   "version": "0.2.0",
   "configurations": [
+    
     {
       "name": "backend: attach debugger",
       "type": "java",
       "request": "attach",
       "hostName": "localhost",
       "port": 5005,
-      "preLaunchTask": "backend: debug"
+      "preLaunchTask": "backend: debug with infra"
     },
     {
       "name": "frontend: launch in Chrome",
@@ -31,6 +32,10 @@
       "name": "app: start and open frontend",
       "configurations": ["frontend: launch in Chrome"],
       "preLaunchTask": "app: run all"
+    },
+    {
+      "name": "backend: debug only",
+      "configurations": ["backend: attach debugger"]
     },
     {
       "name": "app: debug backend and open frontend",

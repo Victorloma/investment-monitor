@@ -2,6 +2,36 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "infra: up",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "up", "-d", "postgres", "redis"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "infra: status",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "ps"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "infra: down",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "down"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "backend: build",
       "type": "shell",
       "command": "${env:USERPROFILE}\\tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
@@ -38,11 +68,11 @@
     },
     {
       "label": "backend: debug",
-      "type": "shell",
+      "type": "process",
       "command": "${env:USERPROFILE}\\tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
       "args": [
         "spring-boot:run",
-        "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+        "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
       ],
       "options": {
         "cwd": "${workspaceFolder}/backend"
@@ -59,6 +89,12 @@
           "endsPattern": ".*Started .* in .* seconds.*"
         }
       }
+    },
+    {
+      "label": "backend: debug with infra",
+      "dependsOrder": "sequence",
+      "dependsOn": ["infra: up", "backend: debug"],
+      "problemMatcher": []
     },
     {
       "label": "frontend: install",
