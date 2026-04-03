@@ -1,0 +1,131 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <div class="toolbar-brand">
+    <span class="toolbar-title">Investment Monitor</span>
+    <mat-chip-set>
+      <mat-chip>JWT Auth</mat-chip>
+      <mat-chip>RBAC</mat-chip>
+      <mat-chip>Angular Material</mat-chip>
+    </mat-chip-set>
+  </div>
+  <div class="toolbar-actions">
+    <button mat-stroked-button>
+      <mat-icon>refresh</mat-icon>
+      Refresh all
+    </button>
+    <button mat-flat-button>
+      <mat-icon>add</mat-icon>
+      Add company
+    </button>
+  </div>
+</mat-toolbar>
+
+<main class="dashboard-shell">
+  <section class="hero-grid">
+    <mat-card class="hero-card hero-card--primary">
+      <mat-card-content>
+        <p class="eyebrow">Portfolio coverage</p>
+        <h1>Track investor relations updates in one place</h1>
+        <p class="hero-copy">
+          Monitor earnings, press releases, and filings with role-based access and real-time refresh workflows.
+        </p>
+        <div class="hero-metrics">
+          <div>
+            <span class="metric-value">{{ portfolioCount }}</span>
+            <span class="metric-label">Companies tracked</span>
+          </div>
+          <div>
+            <span class="metric-value">{{ unreadUpdates }}</span>
+            <span class="metric-label">Unread updates</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="hero-card hero-card--secondary">
+      <mat-card-header>
+        <mat-card-title>Refresh pipeline</mat-card-title>
+        <mat-card-subtitle>Current batch status</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="refresh-row">
+          <span>Portfolio refresh progress</span>
+          <strong>{{ refreshProgress }}%</strong>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="refreshProgress"></mat-progress-bar>
+        <div class="status-chips">
+          <mat-chip-set>
+            <mat-chip color="primary">3 active jobs</mat-chip>
+            <mat-chip>1 queued digest</mat-chip>
+          </mat-chip-set>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <section class="content-grid">
+    <mat-card class="panel-card">
+      <mat-card-header>
+        <mat-card-title>Watchlist</mat-card-title>
+        <mat-card-subtitle>Priority companies in your portfolio</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="watchlist">
+          <div class="watchlist-item" *ngFor="let item of watchlist; trackBy: trackByTicker">
+            <div class="watchlist-item__main">
+              <div>
+                <div class="ticker">{{ item.ticker }}</div>
+                <div class="company">{{ item.company }}</div>
+              </div>
+              <mat-chip>{{ item.status }}</mat-chip>
+            </div>
+            <div class="watchlist-item__meta">
+              <span>{{ item.updates }} new updates</span>
+              <button mat-button color="primary">Open</button>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="panel-card">
+      <mat-card-header>
+        <mat-card-title>Recent activity</mat-card-title>
+        <mat-card-subtitle>Latest monitoring events</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let item of recentActivity; trackBy: trackByActivity">
+            <mat-icon matListItemIcon>notifications</mat-icon>
+            <div matListItemTitle>{{ item.company }}</div>
+            <div matListItemLine>{{ item.event }}</div>
+            <div matListItemLine>{{ item.timestamp }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="panel-card panel-card--wide">
+      <mat-card-header>
+        <mat-card-title>Planned frontend modules</mat-card-title>
+        <mat-card-subtitle>Next implementation targets</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="feature-grid">
+        <div class="feature-tile">
+          <mat-icon>lock</mat-icon>
+          <h3>Authentication</h3>
+          <p>Login, registration, token persistence, and route protection.</p>
+        </div>
+        <div class="feature-tile">
+          <mat-icon>drag_indicator</mat-icon>
+          <h3>Portfolio tools</h3>
+          <p>Drag and drop watchlists, virtual scrolling, and batch refresh actions.</p>
+        </div>
+        <div class="feature-tile">
+          <mat-icon>bolt</mat-icon>
+          <h3>Realtime updates</h3>
+          <p>WebSocket-driven refresh state, alerts, and activity feed updates.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</main>
