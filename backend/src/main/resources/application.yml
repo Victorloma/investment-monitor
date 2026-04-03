@@ -16,6 +16,11 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+security:
+  jwt:
+    secret: ${JWT_SECRET:VGhpc0lzQURldmVsb3BtZW50S2V5VGhhdFNob3VsZEJlUmVwbGFjZWRJblByb2R1Y3Rpb24xMjM0NTY=}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
 server:
   port: 8080
 
