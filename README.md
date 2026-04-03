@@ -5,13 +5,13 @@ Monorepo for an investor relations monitoring MVP focused on authentication, RBA
 ## Tech stack
 
 - `backend/` Java 21, Spring Boot 3, Spring Security, JPA, Flyway, PostgreSQL, JWT, WebSocket support
-- `frontend/` Angular 18.2.x application
+- `frontend/` Angular 20.x application
 - `docker-compose.yml` local PostgreSQL and Redis services
 
 ## Repository structure
 
 - `backend/` Spring Boot API
-- `frontend/` Angular 18.2.x application
+- `frontend/` Angular 20.x application
 - `docker-compose.yml` local infrastructure for development
 
 ## Backend status
@@ -29,7 +29,7 @@ The backend scaffold currently includes:
 - Protected user endpoint:
   - `GET /api/v1/users/me`
 
-The frontend has not been generated yet.
+The frontend Angular application is scaffolded and connected to the backend authentication API.
 
 ## Local prerequisites
 
