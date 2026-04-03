@@ -39,6 +39,66 @@
    gap: 1.5rem;
  }
 
+ .status-stack {
+   display: grid;
+   gap: 1rem;
+ }
+
+ .status-card {
+   border-radius: 16px;
+   box-shadow: 0 10px 30px rgba(14, 30, 62, 0.08);
+ }
+
+ .status-card--success {
+   background: #eef9f1;
+   border: 1px solid #cfe9d5;
+ }
+
+ .status-card--error {
+   background: #fff2f2;
+   border: 1px solid #f0c7c7;
+ }
+
+ .current-user {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 1rem;
+   flex-wrap: wrap;
+ }
+
+ .auth-grid {
+   display: grid;
+   grid-template-columns: minmax(0, 1.15fr) repeat(2, minmax(280px, 1fr));
+   gap: 1.5rem;
+   align-items: start;
+ }
+
+ .auth-card {
+   border-radius: 20px;
+   box-shadow: 0 12px 40px rgba(14, 30, 62, 0.08);
+ }
+
+ .auth-card--primary {
+   background: linear-gradient(135deg, #102542 0%, #183b66 55%, #2366a8 100%);
+   color: #ffffff;
+ }
+
+ .auth-form {
+   display: grid;
+   gap: 1rem;
+ }
+
+ .auth-form__split {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   gap: 1rem;
+ }
+
+ .auth-form mat-form-field {
+   width: 100%;
+ }
+
  .hero-grid,
  .content-grid {
    display: grid;
@@ -178,15 +238,21 @@
  }
 
  @media (max-width: 960px) {
+   .auth-grid,
    .hero-grid,
    .content-grid,
    .feature-grid {
+     grid-template-columns: 1fr;
+   }
+
+   .auth-form__split {
      grid-template-columns: 1fr;
    }
  }
 
  @media (max-width: 720px) {
    .app-toolbar,
+   .current-user,
    .watchlist-item__main,
    .watchlist-item__meta,
    .refresh-row {

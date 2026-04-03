@@ -8,124 +8,224 @@
     </mat-chip-set>
   </div>
   <div class="toolbar-actions">
-    <button mat-stroked-button>
+    <button mat-stroked-button *ngIf="currentUser" (click)="loadCurrentUser()" [disabled]="isLoading">
       <mat-icon>refresh</mat-icon>
-      Refresh all
+      Reload profile
     </button>
-    <button mat-flat-button>
-      <mat-icon>add</mat-icon>
-      Add company
+    <button mat-flat-button *ngIf="currentUser" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sign out
     </button>
   </div>
 </mat-toolbar>
 
 <main class="dashboard-shell">
-  <section class="hero-grid">
-    <mat-card class="hero-card hero-card--primary">
+  <section class="status-stack" *ngIf="isLoading || authMessage || authError || currentUser">
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
+
+    <mat-card class="status-card status-card--success" *ngIf="authMessage">
+      <mat-card-content>{{ authMessage }}</mat-card-content>
+    </mat-card>
+
+    <mat-card class="status-card status-card--error" *ngIf="authError">
+      <mat-card-content>{{ authError }}</mat-card-content>
+    </mat-card>
+
+    <mat-card class="status-card" *ngIf="currentUser">
+      <mat-card-content class="current-user">
+        <div>
+          <p class="eyebrow">Authenticated session</p>
+          <strong>{{ currentUser.email }}</strong>
+        </div>
+        <mat-chip-set>
+          <mat-chip *ngFor="let role of currentUser.roles">{{ role }}</mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <section class="auth-grid" *ngIf="!currentUser; else authenticatedDashboard">
+    <mat-card class="auth-card auth-card--primary">
       <mat-card-content>
-        <p class="eyebrow">Portfolio coverage</p>
-        <h1>Track investor relations updates in one place</h1>
+        <p class="eyebrow">Welcome back</p>
+        <h1>Sign in to your investor relations workspace</h1>
         <p class="hero-copy">
-          Monitor earnings, press releases, and filings with role-based access and real-time refresh workflows.
+          Connect the Angular frontend to your Spring Boot API, persist the JWT, and verify your protected profile endpoint.
         </p>
-        <div class="hero-metrics">
-          <div>
-            <span class="metric-value">{{ portfolioCount }}</span>
-            <span class="metric-label">Companies tracked</span>
-          </div>
-          <div>
-            <span class="metric-value">{{ unreadUpdates }}</span>
-            <span class="metric-label">Unread updates</span>
-          </div>
-        </div>
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="hero-card hero-card--secondary">
+    <mat-card class="auth-card">
       <mat-card-header>
-        <mat-card-title>Refresh pipeline</mat-card-title>
-        <mat-card-subtitle>Current batch status</mat-card-subtitle>
+        <mat-card-title>Login</mat-card-title>
+        <mat-card-subtitle>Call POST /api/v1/auth/login</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <div class="refresh-row">
-          <span>Portfolio refresh progress</span>
-          <strong>{{ refreshProgress }}%</strong>
-        </div>
-        <mat-progress-bar mode="determinate" [value]="refreshProgress"></mat-progress-bar>
-        <div class="status-chips">
-          <mat-chip-set>
-            <mat-chip color="primary">3 active jobs</mat-chip>
-            <mat-chip>1 queued digest</mat-chip>
-          </mat-chip-set>
-        </div>
+        <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+            <mat-error *ngIf="hasLoginFieldError('email')">Enter a valid email address</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" />
+            <mat-error *ngIf="hasLoginFieldError('password')">Password is required</mat-error>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">Sign in</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="auth-card">
+      <mat-card-header>
+        <mat-card-title>Register</mat-card-title>
+        <mat-card-subtitle>Create a BASIC_USER account</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+          <div class="auth-form__split">
+            <mat-form-field appearance="outline">
+              <mat-label>First name</mat-label>
+              <input matInput formControlName="firstName" />
+              <mat-error *ngIf="hasRegisterFieldError('firstName')">First name is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last name</mat-label>
+              <input matInput formControlName="lastName" />
+              <mat-error *ngIf="hasRegisterFieldError('lastName')">Last name is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+            <mat-error *ngIf="hasRegisterFieldError('email')">Enter a valid email address</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" />
+            <mat-error *ngIf="hasRegisterFieldError('password')">Password must be at least 8 characters</mat-error>
+          </mat-form-field>
+
+          <button mat-stroked-button color="primary" type="submit" [disabled]="isLoading">Create account</button>
+        </form>
       </mat-card-content>
     </mat-card>
   </section>
 
-  <section class="content-grid">
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Watchlist</mat-card-title>
-        <mat-card-subtitle>Priority companies in your portfolio</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="watchlist">
-          <div class="watchlist-item" *ngFor="let item of watchlist; trackBy: trackByTicker">
-            <div class="watchlist-item__main">
-              <div>
-                <div class="ticker">{{ item.ticker }}</div>
-                <div class="company">{{ item.company }}</div>
+  <ng-template #authenticatedDashboard>
+    <section class="hero-grid">
+      <mat-card class="hero-card hero-card--primary">
+        <mat-card-content>
+          <p class="eyebrow">Portfolio coverage</p>
+          <h1>Track investor relations updates in one place</h1>
+          <p class="hero-copy">
+            Monitor earnings, press releases, and filings with role-based access and real-time refresh workflows.
+          </p>
+          <div class="hero-metrics">
+            <div>
+              <span class="metric-value">{{ portfolioCount }}</span>
+              <span class="metric-label">Companies tracked</span>
+            </div>
+            <div>
+              <span class="metric-value">{{ unreadUpdates }}</span>
+              <span class="metric-label">Unread updates</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="hero-card hero-card--secondary">
+        <mat-card-header>
+          <mat-card-title>Refresh pipeline</mat-card-title>
+          <mat-card-subtitle>Current batch status</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="refresh-row">
+            <span>Portfolio refresh progress</span>
+            <strong>{{ refreshProgress }}%</strong>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="refreshProgress"></mat-progress-bar>
+          <div class="status-chips">
+            <mat-chip-set>
+              <mat-chip color="primary">3 active jobs</mat-chip>
+              <mat-chip>1 queued digest</mat-chip>
+            </mat-chip-set>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="content-grid">
+      <mat-card class="panel-card">
+        <mat-card-header>
+          <mat-card-title>Watchlist</mat-card-title>
+          <mat-card-subtitle>Priority companies in your portfolio</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="watchlist">
+            <div class="watchlist-item" *ngFor="let item of watchlist; trackBy: trackByTicker">
+              <div class="watchlist-item__main">
+                <div>
+                  <div class="ticker">{{ item.ticker }}</div>
+                  <div class="company">{{ item.company }}</div>
+                </div>
+                <mat-chip>{{ item.status }}</mat-chip>
               </div>
-              <mat-chip>{{ item.status }}</mat-chip>
-            </div>
-            <div class="watchlist-item__meta">
-              <span>{{ item.updates }} new updates</span>
-              <button mat-button color="primary">Open</button>
+              <div class="watchlist-item__meta">
+                <span>{{ item.updates }} new updates</span>
+                <button mat-button color="primary">Open</button>
+              </div>
             </div>
           </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+        </mat-card-content>
+      </mat-card>
 
-    <mat-card class="panel-card">
-      <mat-card-header>
-        <mat-card-title>Recent activity</mat-card-title>
-        <mat-card-subtitle>Latest monitoring events</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-list>
-          <mat-list-item *ngFor="let item of recentActivity; trackBy: trackByActivity">
-            <mat-icon matListItemIcon>notifications</mat-icon>
-            <div matListItemTitle>{{ item.company }}</div>
-            <div matListItemLine>{{ item.event }}</div>
-            <div matListItemLine>{{ item.timestamp }}</div>
-          </mat-list-item>
-        </mat-list>
-      </mat-card-content>
-    </mat-card>
+      <mat-card class="panel-card">
+        <mat-card-header>
+          <mat-card-title>Recent activity</mat-card-title>
+          <mat-card-subtitle>Latest monitoring events</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list>
+            <mat-list-item *ngFor="let item of recentActivity; trackBy: trackByActivity">
+              <mat-icon matListItemIcon>notifications</mat-icon>
+              <div matListItemTitle>{{ item.company }}</div>
+              <div matListItemLine>{{ item.event }}</div>
+              <div matListItemLine>{{ item.timestamp }}</div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
 
-    <mat-card class="panel-card panel-card--wide">
-      <mat-card-header>
-        <mat-card-title>Planned frontend modules</mat-card-title>
-        <mat-card-subtitle>Next implementation targets</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content class="feature-grid">
-        <div class="feature-tile">
-          <mat-icon>lock</mat-icon>
-          <h3>Authentication</h3>
-          <p>Login, registration, token persistence, and route protection.</p>
-        </div>
-        <div class="feature-tile">
-          <mat-icon>drag_indicator</mat-icon>
-          <h3>Portfolio tools</h3>
-          <p>Drag and drop watchlists, virtual scrolling, and batch refresh actions.</p>
-        </div>
-        <div class="feature-tile">
-          <mat-icon>bolt</mat-icon>
-          <h3>Realtime updates</h3>
-          <p>WebSocket-driven refresh state, alerts, and activity feed updates.</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </section>
+      <mat-card class="panel-card panel-card--wide">
+        <mat-card-header>
+          <mat-card-title>Authenticated API state</mat-card-title>
+          <mat-card-subtitle>JWT-backed session details from the backend</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="feature-grid">
+          <div class="feature-tile">
+            <mat-icon>person</mat-icon>
+            <h3>User ID</h3>
+            <p>{{ currentUser?.userId }}</p>
+          </div>
+          <div class="feature-tile">
+            <mat-icon>email</mat-icon>
+            <h3>Email</h3>
+            <p>{{ currentUser?.email }}</p>
+          </div>
+          <div class="feature-tile">
+            <mat-icon>verified_user</mat-icon>
+            <h3>Roles</h3>
+            <p>{{ currentUser?.roles?.join(', ') }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  </ng-template>
 </main>
