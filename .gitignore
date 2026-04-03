@@ -4,6 +4,7 @@
 !.vscode/
 .vscode/*
 !.vscode/tasks.json
+frontend/.vscode/
 *.iml
 
 # OS
