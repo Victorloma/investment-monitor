@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "frontend: launch in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "frontend: run",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}/frontend"
+    },
+    {
+      "name": "frontend: attach in Edge",
+      "type": "msedge",
+      "request": "launch",
+      "preLaunchTask": "frontend: run",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}/frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "app: start and open frontend",
+      "configurations": ["frontend: launch in Chrome"],
+      "preLaunchTask": "app: run all"
+    }
+  ]
+}

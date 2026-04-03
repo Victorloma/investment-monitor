@@ -4,6 +4,7 @@
 !.vscode/
 .vscode/*
 !.vscode/tasks.json
+!.vscode/launch.json
 frontend/.vscode/
 *.iml
 
