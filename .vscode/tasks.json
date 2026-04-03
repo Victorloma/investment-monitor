@@ -37,6 +37,30 @@
       }
     },
     {
+      "label": "backend: debug",
+      "type": "shell",
+      "command": "${env:USERPROFILE}\\tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
+      "args": [
+        "spring-boot:run",
+        "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "java",
+        "pattern": {
+          "regexp": ".*"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*Started .* in .* seconds.*"
+        }
+      }
+    },
+    {
       "label": "frontend: install",
       "type": "shell",
       "command": "npm",
@@ -80,6 +104,12 @@
       "label": "app: run all",
       "dependsOrder": "parallel",
       "dependsOn": ["backend: run", "frontend: run"],
+      "problemMatcher": []
+    },
+    {
+      "label": "app: debug all",
+      "dependsOrder": "parallel",
+      "dependsOn": ["backend: debug", "frontend: run"],
       "problemMatcher": []
     }
   ]
