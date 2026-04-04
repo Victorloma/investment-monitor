@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserPortfolioRepository extends JpaRepository<UserPortfolio, UUID> {
 
-    List<UserPortfolio> findByUserIdOrderByAddedAtDesc(UUID userId);
+  List<UserPortfolio> findByUserIdOrderByAddedAtDesc(UUID userId);
 
-    Optional<UserPortfolio> findByIdAndUserId(UUID id, UUID userId);
+  Optional<UserPortfolio> findByIdAndUserId(UUID id, UUID userId);
 
-    boolean existsByUserIdAndCompanyId(UUID userId, UUID companyId);
+  boolean existsByUserIdAndCompanyId(UUID userId, UUID companyId);
 }

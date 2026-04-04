@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    @GetMapping("/me")
-    public Map<String, Object> me(@AuthenticationPrincipal AuthenticatedUser user) {
-        return Map.of(
-                "userId", user.getUserId(),
-                "email", user.getEmail(),
-                "roles", user.getRoles()
-        );
-    }
+  @GetMapping("/me")
+  public Map<String, Object> me(@AuthenticationPrincipal AuthenticatedUser user) {
+    return Map.of(
+        "userId", user.getUserId(),
+        "email", user.getEmail(),
+        "roles", user.getRoles());
+  }
 }

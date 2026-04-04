@@ -19,69 +19,69 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    private final AppUserRepository appUserRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+  private final AppUserRepository appUserRepository;
+  private final RoleRepository roleRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final AuthenticationManager authenticationManager;
+  private final JwtService jwtService;
 
-    public AuthService(
-            AppUserRepository appUserRepository,
-            RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
-            JwtService jwtService
-    ) {
-        this.appUserRepository = appUserRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
+  public AuthService(
+      AppUserRepository appUserRepository,
+      RoleRepository roleRepository,
+      PasswordEncoder passwordEncoder,
+      AuthenticationManager authenticationManager,
+      JwtService jwtService) {
+    this.appUserRepository = appUserRepository;
+    this.roleRepository = roleRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.authenticationManager = authenticationManager;
+    this.jwtService = jwtService;
+  }
+
+  public AuthResponse register(RegisterRequest request) {
+    if (appUserRepository.existsByEmailIgnoreCase(request.email())) {
+      throw new IllegalArgumentException("Email already in use");
     }
 
-    public AuthResponse register(RegisterRequest request) {
-        if (appUserRepository.existsByEmailIgnoreCase(request.email())) {
-            throw new IllegalArgumentException("Email already in use");
-        }
+    Role defaultRole =
+        roleRepository
+            .findByName("BASIC_USER")
+            .orElseThrow(() -> new IllegalStateException("Default role not configured"));
 
-        Role defaultRole = roleRepository.findByName("BASIC_USER")
-                .orElseThrow(() -> new IllegalStateException("Default role not configured"));
+    AppUser user = new AppUser();
+    user.setEmail(request.email().trim().toLowerCase());
+    user.setPasswordHash(passwordEncoder.encode(request.password()));
+    user.setFirstName(request.firstName().trim());
+    user.setLastName(request.lastName().trim());
+    user.setRoles(Set.of(defaultRole));
 
-        AppUser user = new AppUser();
-        user.setEmail(request.email().trim().toLowerCase());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setFirstName(request.firstName().trim());
-        user.setLastName(request.lastName().trim());
-        user.setRoles(Set.of(defaultRole));
+    AppUser savedUser = appUserRepository.save(user);
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser(savedUser);
 
-        AppUser savedUser = appUserRepository.save(user);
-        AuthenticatedUser authenticatedUser = new AuthenticatedUser(savedUser);
+    return new AuthResponse(
+        savedUser.getId(),
+        savedUser.getEmail(),
+        authenticatedUser.getRoles(),
+        jwtService.generateToken(authenticatedUser));
+  }
 
-        return new AuthResponse(
-                savedUser.getId(),
-                savedUser.getEmail(),
-                authenticatedUser.getRoles(),
-                jwtService.generateToken(authenticatedUser)
-        );
-    }
+  public AuthResponse login(LoginRequest request) {
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-    public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
+    AppUser user =
+        appUserRepository
+            .findByEmailIgnoreCase(request.email())
+            .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
-        AppUser user = appUserRepository.findByEmailIgnoreCase(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+    user.setLastLogin(Instant.now());
+    AppUser savedUser = appUserRepository.save(user);
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser(savedUser);
 
-        user.setLastLogin(Instant.now());
-        AppUser savedUser = appUserRepository.save(user);
-        AuthenticatedUser authenticatedUser = new AuthenticatedUser(savedUser);
-
-        return new AuthResponse(
-                savedUser.getId(),
-                savedUser.getEmail(),
-                authenticatedUser.getRoles(),
-                jwtService.generateToken(authenticatedUser)
-        );
-    }
+    return new AuthResponse(
+        savedUser.getId(),
+        savedUser.getEmail(),
+        authenticatedUser.getRoles(),
+        jwtService.generateToken(authenticatedUser));
+  }
 }

@@ -5,11 +5,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record PortfolioEntryResponse(
-        UUID id,
-        String ticker,
-        String companyName,
-        BigDecimal alertThreshold,
-        boolean monitored,
-        Instant addedAt
-) {
-}
+    UUID id,
+    String ticker,
+    String companyName,
+    BigDecimal alertThreshold,
+    boolean monitored,
+    Instant addedAt) {}
