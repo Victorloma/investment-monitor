@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,11 +29,13 @@ public class PortfolioController {
     this.portfolioService = portfolioService;
   }
 
+  @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER', 'BASIC_USER', 'READ_ONLY')")
   @GetMapping
   public List<PortfolioEntryResponse> list(@AuthenticationPrincipal AuthenticatedUser user) {
     return portfolioService.listPortfolio(user.getUserId());
   }
 
+  @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER', 'BASIC_USER')")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public PortfolioEntryResponse create(
@@ -41,6 +44,7 @@ public class PortfolioController {
     return portfolioService.addPortfolioEntry(user.getUserId(), request);
   }
 
+  @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER', 'BASIC_USER')")
   @DeleteMapping("/{portfolioEntryId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(
