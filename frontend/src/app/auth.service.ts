@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { apiBaseUrl } from './runtime-config';
 
 export type AuthResponse = {
   userId: string;
@@ -29,7 +30,7 @@ export type RegisterRequest = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiBaseUrl = 'http://localhost:8080/api/v1';
+  private readonly apiBaseUrl = apiBaseUrl;
   private readonly tokenStorageKey = 'investment-monitor.access-token';
 
   constructor(private readonly http: HttpClient) {}
@@ -48,7 +49,7 @@ export class AuthService {
 
   me(): Observable<CurrentUser> {
     return this.http.get<CurrentUser>(`${this.apiBaseUrl}/users/me`, {
-      headers: this.createAuthHeaders()
+      headers: this.createAuthHeaders(),
     });
   }
 
