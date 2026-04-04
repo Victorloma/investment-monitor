@@ -1,6 +1,5 @@
 package com.victorloma.investmentmonitor.portfolio;
 
-import com.victorloma.investmentmonitor.user.AppUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,7 +24,7 @@ public class UserPortfolio {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "user_id", nullable = false)
-  private AppUser user;
+  private com.victorloma.investmentmonitor.user.AppUser user;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "company_id", nullable = false)
@@ -49,11 +48,11 @@ public class UserPortfolio {
     return id;
   }
 
-  public AppUser getUser() {
+  public com.victorloma.investmentmonitor.user.AppUser getUser() {
     return user;
   }
 
-  public void setUser(AppUser user) {
+  public void setUser(com.victorloma.investmentmonitor.user.AppUser user) {
     this.user = user;
   }
 
