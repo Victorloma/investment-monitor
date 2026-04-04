@@ -1,5 +1,7 @@
 package com.victorloma.investmentmonitor.security;
 
+import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,12 +25,15 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final CustomUserDetailsService customUserDetailsService;
+  private final String allowedOrigins;
 
   public SecurityConfig(
       JwtAuthenticationFilter jwtAuthenticationFilter,
-      CustomUserDetailsService customUserDetailsService) {
+      CustomUserDetailsService customUserDetailsService,
+      @Value("${app.cors.allowed-origins:http://localhost:4200}") String allowedOrigins) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.customUserDetailsService = customUserDetailsService;
+    this.allowedOrigins = allowedOrigins;
   }
 
   @Bean
@@ -69,7 +74,11 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(java.util.List.of("http://localhost:4200"));
+    configuration.setAllowedOrigins(
+        Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .filter(origin -> !origin.isEmpty())
+            .toList());
     configuration.setAllowedMethods(
         java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
