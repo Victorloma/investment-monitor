@@ -4,6 +4,8 @@ import com.victorloma.investmentmonitor.portfolio.dto.CreatePortfolioEntryReques
 import com.victorloma.investmentmonitor.portfolio.dto.PortfolioEntryResponse;
 import com.victorloma.investmentmonitor.user.AppUser;
 import com.victorloma.investmentmonitor.user.AppUserRepository;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -44,7 +46,7 @@ public class PortfolioService {
     String normalizedTicker = request.ticker().trim().toUpperCase(Locale.ROOT);
     String normalizedCompanyName =
         request.companyName() == null ? "" : request.companyName().trim();
-    String normalizedIrUrl = request.irUrl() == null ? null : request.irUrl().trim();
+    String normalizedIrUrl = normalizeIrUrl(request.irUrl());
 
     Company company =
         companyRepository
@@ -91,6 +93,35 @@ public class PortfolioService {
     company.setIrUrl(irUrl == null || irUrl.isBlank() ? null : irUrl);
     company.setActive(true);
     return companyRepository.save(company);
+  }
+
+  private String normalizeIrUrl(String irUrl) {
+    if (irUrl == null) {
+      return null;
+    }
+
+    String trimmedIrUrl = irUrl.trim();
+    if (trimmedIrUrl.isBlank()) {
+      return null;
+    }
+
+    try {
+      URI uri = new URI(trimmedIrUrl).normalize();
+      String scheme = uri.getScheme();
+      String host = uri.getHost();
+
+      if (scheme == null || host == null || host.isBlank()) {
+        throw new IllegalArgumentException("IR URL must be a valid absolute http or https URL");
+      }
+
+      if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+        throw new IllegalArgumentException("IR URL must start with http:// or https://");
+      }
+
+      return uri.toString();
+    } catch (URISyntaxException exception) {
+      throw new IllegalArgumentException("IR URL must be a valid absolute http or https URL");
+    }
   }
 
   private PortfolioEntryResponse toResponse(UserPortfolio portfolioEntry) {

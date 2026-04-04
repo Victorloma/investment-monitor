@@ -247,8 +247,11 @@
                 <mat-label>Investor relations URL</mat-label>
                 <input matInput formControlName="irUrl" />
                 <mat-hint>Optional but recommended</mat-hint>
-                <mat-error *ngIf="hasPortfolioFieldError('irUrl')"
+                <mat-error *ngIf="hasPortfolioFieldSpecificError('irUrl', 'maxlength')"
                   >IR URL is too long</mat-error
+                >
+                <mat-error *ngIf="hasPortfolioFieldSpecificError('irUrl', 'pattern')"
+                  >IR URL must start with http:// or https://</mat-error
                 >
               </mat-form-field>
             </div>

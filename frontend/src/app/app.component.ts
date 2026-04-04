@@ -21,6 +21,8 @@ type ActivityItem = {
   timestamp: string;
 };
 
+const HTTP_URL_PATTERN = /^https?:\/\/\S+$/i;
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -72,7 +74,7 @@ export class AppComponent implements OnInit {
   protected readonly portfolioForm = this.formBuilder.nonNullable.group({
     ticker: ['', [Validators.required, Validators.maxLength(10)]],
     companyName: ['', [Validators.maxLength(255)]],
-    irUrl: ['', [Validators.maxLength(500)]],
+    irUrl: ['', [Validators.maxLength(500), Validators.pattern(HTTP_URL_PATTERN)]],
     alertThreshold: [''],
   });
 
@@ -288,6 +290,14 @@ export class AppComponent implements OnInit {
   ): boolean {
     const field = this.portfolioForm.controls[fieldName];
     return Boolean(field.invalid && (field.dirty || field.touched));
+  }
+
+  protected hasPortfolioFieldSpecificError(
+    fieldName: 'ticker' | 'companyName' | 'irUrl' | 'alertThreshold',
+    errorName: string,
+  ): boolean {
+    const field = this.portfolioForm.controls[fieldName];
+    return Boolean(field.hasError(errorName) && (field.dirty || field.touched));
   }
 
   private extractErrorMessage(error: {
