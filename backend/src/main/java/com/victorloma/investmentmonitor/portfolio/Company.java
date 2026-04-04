@@ -24,6 +24,9 @@ public class Company {
   @Column(nullable = false)
   private String name;
 
+  @Column(name = "ir_page_url", length = 500)
+  private String irUrl;
+
   @Column(name = "is_active", nullable = false)
   private boolean active = true;
 
@@ -53,6 +56,14 @@ public class Company {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getIrUrl() {
+    return irUrl;
+  }
+
+  public void setIrUrl(String irUrl) {
+    this.irUrl = irUrl;
   }
 
   public boolean isActive() {

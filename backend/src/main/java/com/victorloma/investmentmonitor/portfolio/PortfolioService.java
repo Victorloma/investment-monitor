@@ -44,11 +44,19 @@ public class PortfolioService {
     String normalizedTicker = request.ticker().trim().toUpperCase(Locale.ROOT);
     String normalizedCompanyName =
         request.companyName() == null ? "" : request.companyName().trim();
+    String normalizedIrUrl = request.irUrl() == null ? null : request.irUrl().trim();
 
     Company company =
         companyRepository
             .findByTickerIgnoreCase(normalizedTicker)
-            .orElseGet(() -> createCompany(normalizedTicker, normalizedCompanyName));
+            .orElseGet(() -> createCompany(normalizedTicker, normalizedCompanyName, normalizedIrUrl));
+
+    if ((company.getIrUrl() == null || company.getIrUrl().isBlank())
+        && normalizedIrUrl != null
+        && !normalizedIrUrl.isBlank()) {
+      company.setIrUrl(normalizedIrUrl);
+      company = companyRepository.save(company);
+    }
 
     if (userPortfolioRepository.existsByUserIdAndCompanyId(userId, company.getId())) {
       throw new IllegalArgumentException("Company is already in your portfolio");
@@ -72,7 +80,7 @@ public class PortfolioService {
     userPortfolioRepository.delete(portfolioEntry);
   }
 
-  private Company createCompany(String ticker, String companyName) {
+  private Company createCompany(String ticker, String companyName, String irUrl) {
     if (companyName.isBlank()) {
       throw new IllegalArgumentException("Company name is required when adding a new ticker");
     }
@@ -80,6 +88,7 @@ public class PortfolioService {
     Company company = new Company();
     company.setTicker(ticker);
     company.setName(companyName);
+    company.setIrUrl(irUrl == null || irUrl.isBlank() ? null : irUrl);
     company.setActive(true);
     return companyRepository.save(company);
   }
@@ -89,6 +98,7 @@ public class PortfolioService {
         portfolioEntry.getId(),
         portfolioEntry.getCompany().getTicker(),
         portfolioEntry.getCompany().getName(),
+        portfolioEntry.getCompany().getIrUrl(),
         portfolioEntry.getAlertThreshold(),
         portfolioEntry.isMonitored(),
         portfolioEntry.getAddedAt());

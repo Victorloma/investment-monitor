@@ -72,6 +72,7 @@ export class AppComponent implements OnInit {
   protected readonly portfolioForm = this.formBuilder.nonNullable.group({
     ticker: ['', [Validators.required, Validators.maxLength(10)]],
     companyName: ['', [Validators.maxLength(255)]],
+    irUrl: ['', [Validators.maxLength(500)]],
     alertThreshold: [''],
   });
 
@@ -209,12 +210,14 @@ export class AppComponent implements OnInit {
 
     const rawValue = this.portfolioForm.getRawValue();
     const trimmedCompanyName = rawValue.companyName.trim();
+    const trimmedIrUrl = rawValue.irUrl.trim();
     const trimmedAlertThreshold = rawValue.alertThreshold.trim();
 
     this.portfolioService
       .create({
         ticker: rawValue.ticker.trim().toUpperCase(),
         companyName: trimmedCompanyName,
+        irUrl: trimmedIrUrl || null,
         alertThreshold: trimmedAlertThreshold
           ? Number(trimmedAlertThreshold)
           : null,
@@ -228,6 +231,7 @@ export class AppComponent implements OnInit {
           this.portfolioForm.reset({
             ticker: '',
             companyName: '',
+            irUrl: '',
             alertThreshold: '',
           });
         },
@@ -280,7 +284,7 @@ export class AppComponent implements OnInit {
   }
 
   protected hasPortfolioFieldError(
-    fieldName: 'ticker' | 'companyName' | 'alertThreshold',
+    fieldName: 'ticker' | 'companyName' | 'irUrl' | 'alertThreshold',
   ): boolean {
     const field = this.portfolioForm.controls[fieldName];
     return Boolean(field.invalid && (field.dirty || field.touched));

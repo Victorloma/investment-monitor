@@ -8,6 +8,7 @@ export type PortfolioEntry = {
   id: string;
   ticker: string;
   companyName: string;
+  irUrl: string | null;
   alertThreshold: number | null;
   monitored: boolean;
   addedAt: string;
@@ -16,6 +17,7 @@ export type PortfolioEntry = {
 export type CreatePortfolioEntryRequest = {
   ticker: string;
   companyName: string;
+  irUrl: string | null;
   alertThreshold: number | null;
   monitored: boolean;
 };

@@ -8,6 +8,7 @@ public record PortfolioEntryResponse(
     UUID id,
     String ticker,
     String companyName,
+    String irUrl,
     BigDecimal alertThreshold,
     boolean monitored,
     Instant addedAt) {}

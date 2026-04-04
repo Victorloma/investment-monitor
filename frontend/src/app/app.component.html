@@ -242,6 +242,17 @@
               </mat-form-field>
             </div>
 
+            <div class="portfolio-form__row">
+              <mat-form-field appearance="outline">
+                <mat-label>Investor relations URL</mat-label>
+                <input matInput formControlName="irUrl" />
+                <mat-hint>Optional but recommended</mat-hint>
+                <mat-error *ngIf="hasPortfolioFieldError('irUrl')"
+                  >IR URL is too long</mat-error
+                >
+              </mat-form-field>
+            </div>
+
             <div class="portfolio-form__row portfolio-form__row--actions">
               <mat-form-field appearance="outline">
                 <mat-label>Alert threshold</mat-label>
@@ -287,6 +298,10 @@
                 }}</mat-chip>
               </div>
               <div class="watchlist-item__meta">
+                <span *ngIf="item.irUrl; else noIrUrl">IR source: {{ item.irUrl }}</span>
+                <ng-template #noIrUrl>
+                  <span>No IR URL provided</span>
+                </ng-template>
                 <span *ngIf="item.alertThreshold !== null"
                   >Alert threshold: {{ item.alertThreshold }}</span
                 >
