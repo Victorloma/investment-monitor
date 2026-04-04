@@ -8,9 +8,14 @@
     </mat-chip-set>
   </div>
   <div class="toolbar-actions">
-    <button mat-stroked-button *ngIf="currentUser" (click)="loadCurrentUser()" [disabled]="isLoading">
+    <button
+      mat-stroked-button
+      *ngIf="currentUser"
+      (click)="loadCurrentUser(true)"
+      [disabled]="isLoading"
+    >
       <mat-icon>refresh</mat-icon>
-      Reload profile
+      Reload session
     </button>
     <button mat-flat-button *ngIf="currentUser" (click)="logout()">
       <mat-icon>logout</mat-icon>
@@ -20,7 +25,10 @@
 </mat-toolbar>
 
 <main class="dashboard-shell">
-  <section class="status-stack" *ngIf="isLoading || authMessage || authError || currentUser">
+  <section
+    class="status-stack"
+    *ngIf="isLoading || authMessage || authError || currentUser"
+  >
     <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
 
     <mat-card class="status-card status-card--success" *ngIf="authMessage">
@@ -50,7 +58,8 @@
         <p class="eyebrow">Welcome back</p>
         <h1>Sign in to your investor relations workspace</h1>
         <p class="hero-copy">
-          Connect the Angular frontend to your Spring Boot API, persist the JWT, and verify your protected profile endpoint.
+          Connect the Angular frontend to your Spring Boot API, persist the JWT,
+          and verify your protected profile endpoint.
         </p>
       </mat-card-content>
     </mat-card>
@@ -61,20 +70,35 @@
         <mat-card-subtitle>Call POST /api/v1/auth/login</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <form
+          class="auth-form"
+          [formGroup]="loginForm"
+          (ngSubmit)="submitLogin()"
+        >
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
             <input matInput type="email" formControlName="email" />
-            <mat-error *ngIf="hasLoginFieldError('email')">Enter a valid email address</mat-error>
+            <mat-error *ngIf="hasLoginFieldError('email')"
+              >Enter a valid email address</mat-error
+            >
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
             <input matInput type="password" formControlName="password" />
-            <mat-error *ngIf="hasLoginFieldError('password')">Password is required</mat-error>
+            <mat-error *ngIf="hasLoginFieldError('password')"
+              >Password is required</mat-error
+            >
           </mat-form-field>
 
-          <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">Sign in</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="isLoading"
+          >
+            Sign in
+          </button>
         </form>
       </mat-card-content>
     </mat-card>
@@ -85,34 +109,53 @@
         <mat-card-subtitle>Create a BASIC_USER account</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+        <form
+          class="auth-form"
+          [formGroup]="registerForm"
+          (ngSubmit)="submitRegister()"
+        >
           <div class="auth-form__split">
             <mat-form-field appearance="outline">
               <mat-label>First name</mat-label>
               <input matInput formControlName="firstName" />
-              <mat-error *ngIf="hasRegisterFieldError('firstName')">First name is required</mat-error>
+              <mat-error *ngIf="hasRegisterFieldError('firstName')"
+                >First name is required</mat-error
+              >
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Last name</mat-label>
               <input matInput formControlName="lastName" />
-              <mat-error *ngIf="hasRegisterFieldError('lastName')">Last name is required</mat-error>
+              <mat-error *ngIf="hasRegisterFieldError('lastName')"
+                >Last name is required</mat-error
+              >
             </mat-form-field>
           </div>
 
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
             <input matInput type="email" formControlName="email" />
-            <mat-error *ngIf="hasRegisterFieldError('email')">Enter a valid email address</mat-error>
+            <mat-error *ngIf="hasRegisterFieldError('email')"
+              >Enter a valid email address</mat-error
+            >
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
             <input matInput type="password" formControlName="password" />
-            <mat-error *ngIf="hasRegisterFieldError('password')">Password must be at least 8 characters</mat-error>
+            <mat-error *ngIf="hasRegisterFieldError('password')"
+              >Password must be at least 8 characters</mat-error
+            >
           </mat-form-field>
 
-          <button mat-stroked-button color="primary" type="submit" [disabled]="isLoading">Create account</button>
+          <button
+            mat-stroked-button
+            color="primary"
+            type="submit"
+            [disabled]="isLoading"
+          >
+            Create account
+          </button>
         </form>
       </mat-card-content>
     </mat-card>
@@ -125,16 +168,19 @@
           <p class="eyebrow">Portfolio coverage</p>
           <h1>Track investor relations updates in one place</h1>
           <p class="hero-copy">
-            Monitor earnings, press releases, and filings with role-based access and real-time refresh workflows.
+            Monitor earnings, press releases, and filings with role-based access
+            and real-time refresh workflows.
           </p>
           <div class="hero-metrics">
             <div>
-              <span class="metric-value">{{ portfolioCount }}</span>
+              <span class="metric-value">{{ portfolioEntries.length }}</span>
               <span class="metric-label">Companies tracked</span>
             </div>
             <div>
-              <span class="metric-value">{{ unreadUpdates }}</span>
-              <span class="metric-label">Unread updates</span>
+              <span class="metric-value">{{
+                portfolioEntries.length ? "Live" : "Start"
+              }}</span>
+              <span class="metric-label">Portfolio status</span>
             </div>
           </div>
         </mat-card-content>
@@ -150,7 +196,10 @@
             <span>Portfolio refresh progress</span>
             <strong>{{ refreshProgress }}%</strong>
           </div>
-          <mat-progress-bar mode="determinate" [value]="refreshProgress"></mat-progress-bar>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="refreshProgress"
+          ></mat-progress-bar>
           <div class="status-chips">
             <mat-chip-set>
               <mat-chip color="primary">3 active jobs</mat-chip>
@@ -164,25 +213,102 @@
     <section class="content-grid">
       <mat-card class="panel-card">
         <mat-card-header>
-          <mat-card-title>Watchlist</mat-card-title>
-          <mat-card-subtitle>Priority companies in your portfolio</mat-card-subtitle>
+          <mat-card-title>Portfolio</mat-card-title>
+          <mat-card-subtitle
+            >Add and manage your tracked companies</mat-card-subtitle
+          >
         </mat-card-header>
         <mat-card-content>
-          <div class="watchlist">
-            <div class="watchlist-item" *ngFor="let item of watchlist; trackBy: trackByTicker">
+          <form
+            class="portfolio-form"
+            [formGroup]="portfolioForm"
+            (ngSubmit)="submitPortfolioEntry()"
+          >
+            <div class="portfolio-form__row">
+              <mat-form-field appearance="outline">
+                <mat-label>Ticker</mat-label>
+                <input matInput formControlName="ticker" />
+                <mat-error *ngIf="hasPortfolioFieldError('ticker')"
+                  >Ticker is required</mat-error
+                >
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Company name</mat-label>
+                <input matInput formControlName="companyName" />
+                <mat-error *ngIf="hasPortfolioFieldError('companyName')"
+                  >Company name is too long</mat-error
+                >
+              </mat-form-field>
+            </div>
+
+            <div class="portfolio-form__row portfolio-form__row--actions">
+              <mat-form-field appearance="outline">
+                <mat-label>Alert threshold</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  formControlName="alertThreshold"
+                />
+                <mat-hint>Optional</mat-hint>
+              </mat-form-field>
+
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="isLoading"
+              >
+                Add company
+              </button>
+            </div>
+          </form>
+
+          <div
+            class="portfolio-list"
+            *ngIf="portfolioEntries.length; else emptyPortfolio"
+          >
+            <div
+              class="watchlist-item"
+              *ngFor="
+                let item of portfolioEntries;
+                trackBy: trackByPortfolioEntry
+              "
+            >
               <div class="watchlist-item__main">
                 <div>
                   <div class="ticker">{{ item.ticker }}</div>
-                  <div class="company">{{ item.company }}</div>
+                  <div class="company">{{ item.companyName }}</div>
                 </div>
-                <mat-chip>{{ item.status }}</mat-chip>
+                <mat-chip>{{
+                  item.monitored ? "Monitoring" : "Paused"
+                }}</mat-chip>
               </div>
               <div class="watchlist-item__meta">
-                <span>{{ item.updates }} new updates</span>
-                <button mat-button color="primary">Open</button>
+                <span *ngIf="item.alertThreshold !== null"
+                  >Alert threshold: {{ item.alertThreshold }}</span
+                >
+                <span *ngIf="item.alertThreshold === null"
+                  >No alert threshold set</span
+                >
+                <button
+                  mat-button
+                  color="warn"
+                  (click)="removePortfolioEntry(item.id)"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           </div>
+
+          <ng-template #emptyPortfolio>
+            <div class="empty-state">
+              Add your first company to start building a monitored portfolio.
+            </div>
+          </ng-template>
         </mat-card-content>
       </mat-card>
 
@@ -193,7 +319,9 @@
         </mat-card-header>
         <mat-card-content>
           <mat-list>
-            <mat-list-item *ngFor="let item of recentActivity; trackBy: trackByActivity">
+            <mat-list-item
+              *ngFor="let item of recentActivity; trackBy: trackByActivity"
+            >
               <mat-icon matListItemIcon>notifications</mat-icon>
               <div matListItemTitle>{{ item.company }}</div>
               <div matListItemLine>{{ item.event }}</div>
@@ -206,7 +334,9 @@
       <mat-card class="panel-card panel-card--wide">
         <mat-card-header>
           <mat-card-title>Authenticated API state</mat-card-title>
-          <mat-card-subtitle>JWT-backed session details from the backend</mat-card-subtitle>
+          <mat-card-subtitle
+            >JWT-backed session details from the backend</mat-card-subtitle
+          >
         </mat-card-header>
         <mat-card-content class="feature-grid">
           <div class="feature-tile">
@@ -222,7 +352,7 @@
           <div class="feature-tile">
             <mat-icon>verified_user</mat-icon>
             <h3>Roles</h3>
-            <p>{{ currentUser?.roles?.join(', ') }}</p>
+            <p>{{ currentUser?.roles?.join(", ") }}</p>
           </div>
         </mat-card-content>
       </mat-card>
