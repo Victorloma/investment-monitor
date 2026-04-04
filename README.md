@@ -14,6 +14,14 @@ Monorepo for an investor relations monitoring MVP focused on authentication, RBA
 - `frontend/` Angular 20.x application
 - `docker-compose.yml` local infrastructure for development
 
+## Deployment
+
+Deployment documentation and templates are available in:
+
+- `DEPLOYMENT.md`
+- `backend/.env.example`
+- `frontend/src/assets/runtime-config.example.js`
+
 ## Backend status
 
 The backend scaffold currently includes:
@@ -69,15 +77,14 @@ Optional environment variables:
 - `DATABASE_PASSWORD`
 - `JWT_SECRET`
 - `JWT_EXPIRATION_MS`
+- `CORS_ALLOWED_ORIGINS`
+- `PORT`
 
-## Current blockers
-
-- Maven still needs to be installed and available on `PATH` locally
-- Backend compile/run verification still needs to be completed after Maven is available
+The backend is also Docker-ready for container deployment.
 
 ## Next planned steps
 
-- Finish backend compile verification and fix any issues
+- Deploy backend to a hosted container platform
+- Deploy frontend to static hosting
+- Validate end-to-end production auth and portfolio flows
 - Extend JWT auth with refresh and verification flows
-- Generate Angular frontend with Material/CDK
-- Add Docker support for backend and frontend services
