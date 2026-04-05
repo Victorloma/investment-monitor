@@ -1,6 +1,7 @@
 package com.victorloma.investmentmonitor.portfolio;
 
 import com.victorloma.investmentmonitor.portfolio.dto.CreatePortfolioEntryRequest;
+import com.victorloma.investmentmonitor.portfolio.dto.PortfolioCrawlPreviewResponse;
 import com.victorloma.investmentmonitor.portfolio.dto.PortfolioEntryResponse;
 import com.victorloma.investmentmonitor.security.AuthenticatedUser;
 import jakarta.validation.Valid;
@@ -24,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class PortfolioController {
 
   private final PortfolioService portfolioService;
+  private final IrCrawlService irCrawlService;
 
-  public PortfolioController(PortfolioService portfolioService) {
+  public PortfolioController(PortfolioService portfolioService, IrCrawlService irCrawlService) {
     this.portfolioService = portfolioService;
+    this.irCrawlService = irCrawlService;
   }
 
   @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER', 'BASIC_USER', 'READ_ONLY')")
@@ -42,6 +45,13 @@ public class PortfolioController {
       @AuthenticationPrincipal AuthenticatedUser user,
       @Valid @RequestBody CreatePortfolioEntryRequest request) {
     return portfolioService.addPortfolioEntry(user.getUserId(), request);
+  }
+
+  @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER', 'BASIC_USER')")
+  @GetMapping("/{portfolioEntryId}/crawl-preview")
+  public PortfolioCrawlPreviewResponse crawlPreview(
+      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID portfolioEntryId) {
+    return irCrawlService.previewPortfolioEntryIrLinks(user.getUserId(), portfolioEntryId);
   }
 
   @PreAuthorize("hasAnyRole('ADMIN', 'PREMIUM_USER', 'BASIC_USER')")
