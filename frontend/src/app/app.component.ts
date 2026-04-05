@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -13,7 +13,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { finalize } from 'rxjs';
 import { AuthResponse, AuthService, CurrentUser } from './auth.service';
-import { PortfolioEntry, PortfolioService } from './portfolio.service';
+import { BriefingContent, BriefingService, IrBriefingResponse, UserSettingsResponse } from './briefing.service';
+import { CrawlPreviewResponse, PortfolioEntry, PortfolioService } from './portfolio.service';
 
 type ActivityItem = {
   company: string;
@@ -27,6 +28,7 @@ const HTTP_URL_PATTERN = /^https?:\/\/\S+$/i;
   selector: 'app-root',
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
@@ -46,6 +48,7 @@ export class AppComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly portfolioService = inject(PortfolioService);
+  private readonly briefingService = inject(BriefingService);
 
   readonly refreshProgress = 68;
 
@@ -55,6 +58,18 @@ export class AppComponent implements OnInit {
   protected currentUser: CurrentUser | null = null;
   protected authResponse: AuthResponse | null = null;
   protected portfolioEntries: PortfolioEntry[] = [];
+  protected crawlPreviews = new Map<string, CrawlPreviewResponse>();
+  protected crawlingIds = new Set<string>();
+
+  protected userSettings: UserSettingsResponse | null = null;
+  protected briefings = new Map<string, BriefingContent>();
+  protected fetchingBriefingIds = new Set<string>();
+  protected isRefreshingAll = false;
+  protected showSettingsPanel = false;
+  protected apiKeyInput = '';
+  protected providerUrlInput = 'https://generativelanguage.googleapis.com/v1beta/openai/';
+  protected modelIdInput = 'gemini-2.0-flash-lite';
+  protected isSavingApiKey = false;
 
   protected readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -193,10 +208,95 @@ export class AppComponent implements OnInit {
       .subscribe({
         next: (entries) => {
           this.portfolioEntries = entries;
+          this.loadSettings();
+          entries.forEach((e) => this.loadPersistedBriefing(e.id));
         },
         error: (error) => {
           this.authError = this.extractErrorMessage(error);
         },
+      });
+  }
+
+  protected loadSettings(): void {
+    this.briefingService.getSettings().subscribe({
+      next: (s) => {
+        this.userSettings = s;
+        this.providerUrlInput = s.providerUrl;
+        this.modelIdInput = s.modelId;
+      },
+      error: () => {},
+    });
+  }
+
+  private loadPersistedBriefing(portfolioEntryId: string): void {
+    this.briefingService.getLatestBriefing(portfolioEntryId).subscribe({
+      next: (response) => {
+        if (response) {
+          this.storeBriefing(response);
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  protected fetchBriefing(portfolioEntryId: string): void {
+    this.fetchingBriefingIds.add(portfolioEntryId);
+    this.authError = '';
+
+    this.briefingService
+      .fetchBriefing(portfolioEntryId)
+      .pipe(finalize(() => this.fetchingBriefingIds.delete(portfolioEntryId)))
+      .subscribe({
+        next: (response) => this.storeBriefing(response),
+        error: (error) => (this.authError = this.extractErrorMessage(error)),
+      });
+  }
+
+  protected refreshAllBriefings(): void {
+    this.isRefreshingAll = true;
+    this.authError = '';
+
+    this.briefingService
+      .refreshAll()
+      .pipe(finalize(() => (this.isRefreshingAll = false)))
+      .subscribe({
+        next: (responses) => responses.forEach((r) => this.storeBriefing(r)),
+        error: (error) => (this.authError = this.extractErrorMessage(error)),
+      });
+  }
+
+  private storeBriefing(response: IrBriefingResponse): void {
+    const content = this.briefingService.parseBriefingJson(response.briefingJson);
+    if (content) {
+      this.briefings.set(response.portfolioEntryId, content);
+    }
+  }
+
+  protected saveApiKey(): void {
+    if (!this.apiKeyInput.trim()) return;
+    this.isSavingApiKey = true;
+    this.authError = '';
+
+    this.briefingService
+      .saveSettings({
+        apiKey: this.apiKeyInput.trim(),
+        providerUrl: this.providerUrlInput.trim(),
+        modelId: this.modelIdInput.trim(),
+      })
+      .pipe(finalize(() => (this.isSavingApiKey = false)))
+      .subscribe({
+        next: () => {
+          this.userSettings = {
+            hasApiKey: true,
+            providerUrl: this.providerUrlInput.trim(),
+            modelId: this.modelIdInput.trim(),
+          };
+          this.apiKeyInput = '';
+          this.showSettingsPanel = false;
+          this.authMessage = 'Settings saved';
+        },
+        error: (error: { error?: unknown; message?: string }) =>
+          (this.authError = this.extractErrorMessage(error)),
       });
   }
 
@@ -243,6 +343,27 @@ export class AppComponent implements OnInit {
       });
   }
 
+  protected loadCrawlPreview(portfolioEntryId: string): void {
+    this.crawlingIds.add(portfolioEntryId);
+    this.authError = '';
+
+    this.portfolioService
+      .crawlPreview(portfolioEntryId)
+      .pipe(finalize(() => this.crawlingIds.delete(portfolioEntryId)))
+      .subscribe({
+        next: (preview) => {
+          this.crawlPreviews.set(portfolioEntryId, preview);
+        },
+        error: (error) => {
+          this.authError = this.extractErrorMessage(error);
+        },
+      });
+  }
+
+  protected dismissCrawlPreview(portfolioEntryId: string): void {
+    this.crawlPreviews.delete(portfolioEntryId);
+  }
+
   protected removePortfolioEntry(portfolioEntryId: string): void {
     this.isLoading = true;
     this.authError = '';
@@ -269,6 +390,9 @@ export class AppComponent implements OnInit {
     this.currentUser = null;
     this.authResponse = null;
     this.portfolioEntries = [];
+    this.briefings.clear();
+    this.userSettings = null;
+    this.showSettingsPanel = false;
     this.authMessage = 'Signed out';
     this.authError = '';
   }

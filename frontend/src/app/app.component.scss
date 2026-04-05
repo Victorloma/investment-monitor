@@ -181,6 +181,10 @@ h1 {
   gap: 1rem;
 }
 
+.watchlist-item__meta {
+  flex-wrap: wrap;
+}
+
 .status-chips {
   margin-top: 1rem;
 }
@@ -258,6 +262,205 @@ h1 {
 .feature-tile p {
   margin: 0;
   color: #58657b;
+}
+
+.settings-panel {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(14, 30, 62, 0.08);
+  border: 1px solid #dce6f5;
+}
+
+.settings-form {
+  display: grid;
+  gap: 1rem;
+
+  &__wide {
+    width: 100%;
+  }
+
+  button {
+    justify-self: start;
+  }
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.no-key-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #8896aa;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.briefing-panel {
+  border-top: 1px solid #e4eaf4;
+  padding-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.briefing-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #235ea8;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.briefing-panel__summary {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #3a4a5c;
+  line-height: 1.5;
+}
+
+.briefing-panel__items {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.briefing-item {
+  padding: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e4eaf4;
+  border-radius: 12px;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.briefing-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.briefing-item__type {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  background: #e8eef8;
+  color: #235ea8;
+
+  &--earnings    { background: #e8f5e9; color: #2e7d32; }
+  &--filing      { background: #fff3e0; color: #e65100; }
+  &--press_release { background: #e3f2fd; color: #1565c0; }
+  &--event       { background: #f3e5f5; color: #6a1b9a; }
+}
+
+.briefing-item__date {
+  font-size: 0.78rem;
+  color: #8896aa;
+}
+
+.briefing-item__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #172033;
+
+  a {
+    color: #235ea8;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.briefing-item__summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #58657b;
+  line-height: 1.5;
+}
+
+.watchlist-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.crawl-preview {
+  border-top: 1px solid #e4eaf4;
+  padding-top: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.crawl-preview__summary {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #58657b;
+
+  a {
+    color: #235ea8;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.crawl-preview__list {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.crawl-preview__link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: #235ea8;
+  text-decoration: none;
+  padding: 0.25rem 0;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover span {
+    text-decoration: underline;
+  }
+}
+
+.crawl-preview__empty {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #8896aa;
 }
 
 .empty-state {

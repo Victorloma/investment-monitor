@@ -22,6 +22,20 @@ export type CreatePortfolioEntryRequest = {
   monitored: boolean;
 };
 
+export type CrawlLinkCandidate = {
+  url: string;
+  title: string;
+};
+
+export type CrawlPreviewResponse = {
+  portfolioEntryId: string;
+  ticker: string;
+  companyName: string;
+  irUrl: string;
+  candidateCount: number;
+  candidates: CrawlLinkCandidate[];
+};
+
 @Injectable({ providedIn: 'root' })
 export class PortfolioService {
   private readonly http = inject(HttpClient);
@@ -41,6 +55,13 @@ export class PortfolioService {
       {
         headers: this.createAuthHeaders(),
       },
+    );
+  }
+
+  crawlPreview(portfolioEntryId: string): Observable<CrawlPreviewResponse> {
+    return this.http.get<CrawlPreviewResponse>(
+      `${this.apiBaseUrl}/portfolio/${portfolioEntryId}/crawl-preview`,
+      { headers: this.createAuthHeaders() },
     );
   }
 

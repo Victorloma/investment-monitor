@@ -17,6 +17,10 @@
       <mat-icon>refresh</mat-icon>
       Reload session
     </button>
+    <button mat-stroked-button *ngIf="currentUser" (click)="showSettingsPanel = !showSettingsPanel">
+      <mat-icon>key</mat-icon>
+      {{ userSettings?.hasApiKey ? 'API key set' : 'Add API key' }}
+    </button>
     <button mat-flat-button *ngIf="currentUser" (click)="logout()">
       <mat-icon>logout</mat-icon>
       Sign out
@@ -51,6 +55,40 @@
       </mat-card-content>
     </mat-card>
   </section>
+
+  <mat-card class="settings-panel" *ngIf="currentUser && showSettingsPanel">
+    <mat-card-header>
+      <mat-card-title>LLM provider settings</mat-card-title>
+      <mat-card-subtitle>
+        {{ userSettings?.hasApiKey ? 'API key saved — paste a new one to replace it' : 'Required to generate IR briefings' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="settings-form">
+        <mat-form-field appearance="outline" class="settings-form__wide">
+          <mat-label>Provider base URL</mat-label>
+          <input matInput [(ngModel)]="providerUrlInput" placeholder="https://generativelanguage.googleapis.com/v1beta/openai/" />
+          <mat-hint>Any OpenAI-compatible /v1 endpoint with web search support</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="settings-form__wide">
+          <mat-label>Model ID</mat-label>
+          <input matInput [(ngModel)]="modelIdInput" placeholder="moonshotai/kimi-k2-5" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="settings-form__wide">
+          <mat-label>API key</mat-label>
+          <input matInput type="password" [(ngModel)]="apiKeyInput" placeholder="Leave blank to keep existing key" />
+        </mat-form-field>
+        <button
+          mat-flat-button
+          color="primary"
+          [disabled]="(!apiKeyInput.trim() && !userSettings?.hasApiKey) || isSavingApiKey"
+          (click)="saveApiKey()"
+        >
+          {{ isSavingApiKey ? 'Saving…' : 'Save settings' }}
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
   <section class="auth-grid" *ngIf="!currentUser; else authenticatedDashboard">
     <mat-card class="auth-card auth-card--primary">
@@ -214,9 +252,21 @@
       <mat-card class="panel-card">
         <mat-card-header>
           <mat-card-title>Portfolio</mat-card-title>
-          <mat-card-subtitle
-            >Add and manage your tracked companies</mat-card-subtitle
-          >
+          <mat-card-subtitle>Add and manage your tracked companies</mat-card-subtitle>
+          <div class="card-header-actions">
+            <button
+              mat-stroked-button
+              *ngIf="userSettings?.hasApiKey && portfolioEntries.length"
+              [disabled]="isRefreshingAll"
+              (click)="refreshAllBriefings()"
+            >
+              <mat-icon>auto_awesome</mat-icon>
+              {{ isRefreshingAll ? 'Refreshing…' : 'Refresh all briefings' }}
+            </button>
+            <span *ngIf="!userSettings?.hasApiKey" class="no-key-hint">
+              <mat-icon>info</mat-icon> Add a Kimi API key to enable IR briefings
+            </span>
+          </div>
         </mat-card-header>
         <mat-card-content>
           <form
@@ -311,13 +361,85 @@
                 <span *ngIf="item.alertThreshold === null"
                   >No alert threshold set</span
                 >
-                <button
-                  mat-button
-                  color="warn"
-                  (click)="removePortfolioEntry(item.id)"
-                >
-                  Remove
-                </button>
+                <div class="watchlist-item__actions">
+                  <button
+                    mat-stroked-button
+                    *ngIf="userSettings?.hasApiKey"
+                    [disabled]="fetchingBriefingIds.has(item.id)"
+                    (click)="fetchBriefing(item.id)"
+                  >
+                    <mat-icon>auto_awesome</mat-icon>
+                    {{ fetchingBriefingIds.has(item.id) ? 'Fetching…' : (briefings.has(item.id) ? 'Refresh briefing' : 'Get briefing') }}
+                  </button>
+                  <button
+                    mat-stroked-button
+                    *ngIf="item.irUrl && !crawlPreviews.has(item.id)"
+                    [disabled]="crawlingIds.has(item.id)"
+                    (click)="loadCrawlPreview(item.id)"
+                  >
+                    <mat-icon>travel_explore</mat-icon>
+                    {{ crawlingIds.has(item.id) ? 'Scanning…' : 'Preview IR links' }}
+                  </button>
+                  <button
+                    mat-stroked-button
+                    *ngIf="crawlPreviews.has(item.id)"
+                    (click)="dismissCrawlPreview(item.id)"
+                  >
+                    <mat-icon>close</mat-icon>
+                    Dismiss
+                  </button>
+                  <button
+                    mat-button
+                    color="warn"
+                    (click)="removePortfolioEntry(item.id)"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <div class="briefing-panel" *ngIf="briefings.get(item.id) as briefing">
+                <div class="briefing-panel__header">
+                  <mat-icon>auto_awesome</mat-icon>
+                  <span class="briefing-panel__title">IR Briefing</span>
+                </div>
+                <p class="briefing-panel__summary">{{ briefing.analystSummary }}</p>
+                <div class="briefing-panel__items">
+                  <div class="briefing-item" *ngFor="let bi of briefing.items">
+                    <div class="briefing-item__meta">
+                      <span class="briefing-item__type briefing-item__type--{{ bi.type | lowercase }}">{{ bi.type | titlecase }}</span>
+                      <span class="briefing-item__date" *ngIf="bi.date">{{ bi.date | date:'mediumDate' }}</span>
+                    </div>
+                    <div class="briefing-item__title">
+                      <a *ngIf="bi.url" [href]="bi.url" target="_blank" rel="noopener">{{ bi.title }}</a>
+                      <span *ngIf="!bi.url">{{ bi.title }}</span>
+                    </div>
+                    <p class="briefing-item__summary">{{ bi.summary }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="crawl-preview" *ngIf="crawlPreviews.get(item.id) as preview">
+                <p class="crawl-preview__summary">
+                  {{ preview.candidateCount }} IR link{{ preview.candidateCount === 1 ? '' : 's' }} found on
+                  <a [href]="preview.irUrl" target="_blank" rel="noopener">{{ preview.irUrl }}</a>
+                </p>
+                <div *ngIf="preview.candidates.length; else noCandidates" class="crawl-preview__list">
+                  <a
+                    *ngFor="let candidate of preview.candidates"
+                    class="crawl-preview__link"
+                    [href]="candidate.url"
+                    target="_blank"
+                    rel="noopener"
+                    [title]="candidate.url"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                    <span>{{ candidate.title || candidate.url }}</span>
+                  </a>
+                </div>
+                <ng-template #noCandidates>
+                  <p class="crawl-preview__empty">No IR-relevant links detected on this page.</p>
+                </ng-template>
               </div>
             </div>
           </div>
